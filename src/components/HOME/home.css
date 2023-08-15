@@ -1,0 +1,9 @@
+body{
+  background-image: url("./Images/taskMgt_bg.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-attachment: fixed;
+}
