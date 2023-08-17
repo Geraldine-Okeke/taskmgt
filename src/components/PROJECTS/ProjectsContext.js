@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ProjectsContext = createContext();
 
@@ -8,18 +8,40 @@ export function useProjects() {
 
 export function ProjectsProvider({ children }) {
   const [projects, setProjects] = useState([]);
+  const [profilePic, setProfilePic] = useState(null);
+  const [username, setUsername] = useState('');
 
-  const addProject = (name, description) => {
-    const newProject = { name, description };
-    setProjects([...projects, newProject]);
+  useEffect(() => {
+    const storedProfilePic = localStorage.getItem('profilePic');
+    const storedUsername = localStorage.getItem('username');
+    setProfilePic(storedProfilePic);
+    setUsername(storedUsername);
+  }, []); 
+
+  const addProject = (name, description, startDate, dueDate) => {
+    const userKey = username || 'guest';
+    const newProject = { name, description, startDate, dueDate, addedBy: username }; // Add addedBy property
+  
+    const existingUserProjects = JSON.parse(localStorage.getItem(userKey)) || [];
+  
+    const updatedUserProjects = [...existingUserProjects, newProject];
+  
+    localStorage.setItem(userKey, JSON.stringify(updatedUserProjects));
+  
+    setProjects(updatedUserProjects);
   };
+  
+
   const deleteProject = (index) => {
-    const updatedProjects = projects.filter((_, i) => i !== index);
-    setProjects(updatedProjects);
+    const userKey = username || 'guest';
+    const existingUserProjects = JSON.parse(localStorage.getItem(userKey)) || [];
+    const updatedUserProjects = existingUserProjects.filter((_, i) => i !== index);
+    localStorage.setItem(userKey, JSON.stringify(updatedUserProjects));
+    setProjects(updatedUserProjects);
   };
 
   return (
-    <ProjectsContext.Provider value={{ projects, addProject, deleteProject }}>
+    <ProjectsContext.Provider value={{ projects, addProject, deleteProject, profilePic, username }}>
       {children}
     </ProjectsContext.Provider>
   );

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useProjects } from './ProjectsContext';
 function ProjectsPage() {
-  const { addProject } = useProjects();
 
   return (
     <div>
