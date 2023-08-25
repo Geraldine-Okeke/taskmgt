@@ -1,3 +1,5 @@
+// ProjectsContext.js
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ProjectsContext = createContext();
@@ -16,21 +18,27 @@ export function ProjectsProvider({ children }) {
     const storedUsername = localStorage.getItem('username');
     setProfilePic(storedProfilePic);
     setUsername(storedUsername);
-  }, []); 
+  }, []);
 
-  const addProject = (name, description, startDate, dueDate) => {
+  const addProject = (name, description, startDate, dueDate, steps) => {
     const userKey = username || 'guest';
-    const newProject = { name, description, startDate, dueDate, addedBy: username }; // Add addedBy property
-  
+    const newProject = {
+      name,
+      description,
+      startDate,
+      dueDate,
+      addedBy: username,
+      steps, // Include steps property          
+    };
+
     const existingUserProjects = JSON.parse(localStorage.getItem(userKey)) || [];
-  
+
     const updatedUserProjects = [...existingUserProjects, newProject];
-  
+
     localStorage.setItem(userKey, JSON.stringify(updatedUserProjects));
-  
+
     setProjects(updatedUserProjects);
   };
-  
 
   const deleteProject = (index) => {
     const userKey = username || 'guest';
@@ -41,7 +49,9 @@ export function ProjectsProvider({ children }) {
   };
 
   return (
-    <ProjectsContext.Provider value={{ projects, addProject, deleteProject, profilePic, username }}>
+    <ProjectsContext.Provider
+      value={{ projects, addProject, deleteProject, profilePic, username,setProjects }}
+    >
       {children}
     </ProjectsContext.Provider>
   );

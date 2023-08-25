@@ -1,52 +1,75 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useProjects } from './ProjectsContext';
-import { toast } from 'react-toastify';
+
 
 function ViewProjects({ authenticated }) {
-  const { projects, deleteProject, username } = useProjects();
-  const notifiedProjectsRef = useRef([]);
-  const toastRefs = useRef([]);
+  const { projects, deleteProject, username, setProjects } = useProjects();
 
-  const dateDiffInDays = (date1, date2) => {
-    const diffInMs = new Date(date1).getTime() - new Date(date2).getTime();
-    return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  
+
+  const handleToggleStep = (projectIndex, stepIndex) => {
+    const updatedProjects = [...projects];
+    updatedProjects[projectIndex].steps[stepIndex].completed = !updatedProjects[projectIndex].steps[stepIndex].completed;
+    setProjects(updatedProjects);
   };
 
-  const notifyApproachingDate = (projectName, daysLeft, approachingType) => {
-    const daysWord = daysLeft === 1 ? 'day' : 'days';
-    const message = `Approaching ${approachingType} for "${projectName}". Only ${daysLeft} ${daysWord} left.`;
-    const toastRef = toast.info(message);
-    toastRefs.current.push(toastRef);
+  const userProjects = projects.filter((project) => project.addedBy === username);
+
+  const calculatePercentage = (completedSteps, totalSteps) => {
+    if (totalSteps === 0) {
+      return 0;
+    }
+    return (completedSteps / totalSteps) * 100;
   };
 
-  useEffect(() => {
-    const currentDate = new Date();
-    projects.forEach((project) => {
-      const daysUntilStart = dateDiffInDays(project.startDate, currentDate);
-      const daysUntilDue = dateDiffInDays(project.dueDate, currentDate);
-
-      if (daysUntilStart <= 2 && currentDate < new Date(project.startDate)) {
-        if (!notifiedProjectsRef.current.includes(project.name)) {
-          notifyApproachingDate(project.name, daysUntilStart, 'start date');
-          notifiedProjectsRef.current.push(project.name);
-        }
-      } else if (daysUntilDue <= 2 && currentDate >= new Date(project.startDate)) {
-        if (!notifiedProjectsRef.current.includes(project.name)) {
-          notifyApproachingDate(project.name, daysUntilDue, 'due date');
-          notifiedProjectsRef.current.push(project.name);
-        }
-      }
-    });
-  }, [projects]);
+  const [visibleSteps, setVisibleSteps] = useState({});
+  const [animatedProgress, setAnimatedProgress] = useState({});
 
   const handleDeleteProject = (index) => {
     const shouldDelete = window.confirm('Are you sure you want to delete this project?');
     if (shouldDelete) {
-      deleteProject(index);
+      const updatedProjects = projects.filter((_, projectIndex) => projectIndex !== index);
+      setProjects(updatedProjects);
     }
   };
+  const animateProgress = (projectIndex, progress) => {
+    setAnimatedProgress((prevProgress) => ({ ...prevProgress, [projectIndex]: 0 }));
+    let currentProgress = 0;
+    const animationInterval = setInterval(() => {
+      currentProgress += 1;
+      if (currentProgress >= progress) {
+        clearInterval(animationInterval);
+      }
+      setAnimatedProgress((prevProgress) => ({ ...prevProgress, [projectIndex]: currentProgress }));
+    }, 20); // Adjust the interval as needed for smoother animation
+  };
 
-  const userProjects = projects.filter((project) => project.addedBy === username);
+  useEffect(() => {
+    userProjects.forEach((project, projectIndex) => {
+      const completedSteps = project.steps.filter(step => step.completed).length;
+      const totalSteps = project.steps.length;
+      const progressPercentage = calculatePercentage(completedSteps, totalSteps);
+
+      if (animatedProgress[projectIndex] !== undefined) {
+        animateProgress(projectIndex, progressPercentage);
+      }
+    });
+  }, [animatedProgress, userProjects]);
+
+  useEffect(() => {
+    userProjects.forEach((project, projectIndex) => {
+      const completedSteps = project.steps.filter(step => step.completed).length;
+      const totalSteps = project.steps.length;
+      const progressPercentage = calculatePercentage(completedSteps, totalSteps);
+
+      if (progressPercentage === 100) {
+        const shouldDelete = window.confirm(`The project "${project.name}" is marked as completed. Do you want to delete it?`);
+        if (shouldDelete) {
+          deleteProject(projectIndex);
+        }
+      }
+    });
+  }, [userProjects, deleteProject]);
 
   return (
     <div>
@@ -55,17 +78,56 @@ function ViewProjects({ authenticated }) {
         <p>You have no projects, take care</p>
       ) : (
         <ul>
-          {userProjects.map((project, index) => (
-            <li key={index}>
-              {project.name}
-              {project.name && project.description && (
-                <span> (Start: {project.startDate}, Due: {project.dueDate})</span>
-              )}
-              {authenticated && project.name && project.description && (
-                <button onClick={() => handleDeleteProject(index)}>Delete</button>
-              )}
-            </li>
-          ))}
+          {userProjects.map((project, projectIndex) => {
+            const completedSteps = project.steps.filter(step => step.completed).length;
+            const totalSteps = project.steps.length;
+            const progressPercentage = calculatePercentage(completedSteps, totalSteps);
+
+            return (
+              <li key={projectIndex}>
+                <button onClick={() => setVisibleSteps((prevVisibleSteps) => ({ ...prevVisibleSteps, [projectIndex]: !prevVisibleSteps[projectIndex] }))}>
+                  {project.name}
+                </button>
+                {project.name && project.description && (
+                  <span> (Start: {project.startDate}, Due: {project.dueDate})</span>
+                )}
+                {authenticated && project.name && project.description && (
+                  <div>
+                    <button onClick={() => handleDeleteProject(projectIndex)}>Delete Project</button>
+                    <span>Progress: {animatedProgress[projectIndex] !== undefined ? animatedProgress[projectIndex] : progressPercentage.toFixed(2)}%</span>
+                    <div style={{ width: '100%', height: '10px', backgroundColor: '#ccc', marginTop: '5px' }}>
+                      <div
+                        style={{
+                          width: `${animatedProgress[projectIndex] !== undefined ? animatedProgress[projectIndex] : progressPercentage}%`,
+                          height: '100%',
+                          backgroundColor: '#00aaff',
+                          transition: 'width 0.2s ease', // Add a smooth transition effect
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {visibleSteps[projectIndex] && project.steps && (
+                  <ul>
+                    {project.steps.map((step, stepIndex) => (
+                      <li key={stepIndex}>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={step.completed}
+                            onChange={() => handleToggleStep(projectIndex, stepIndex)}
+                          />
+                          {step.name}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

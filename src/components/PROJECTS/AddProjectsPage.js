@@ -5,10 +5,9 @@ import { useProjects } from './ProjectsContext';
 function AddProjectPage() {
   const { addProject } = useProjects();
 
-  
-  const handleAddProject = (name, description, startDate, dueDate) => {
-    
-    addProject(name, description, startDate, dueDate);
+  const handleAddProject = (name, description, startDate, dueDate, steps) => {
+    // Pass the steps array to the addProject function
+    addProject(name, description, startDate, dueDate, steps);
   };
   
   return (
@@ -18,7 +17,5 @@ function AddProjectPage() {
     </div>
   );
 }
-
-
 
 export default AddProjectPage;
