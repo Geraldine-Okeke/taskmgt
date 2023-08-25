@@ -31,7 +31,6 @@ const SignUp = ({ handleSignIn }) => {
       localStorage.setItem('profilePic', profilePic || defaultProfilePic);
       localStorage.setItem('username', username);
 
-      
       const userProjects = JSON.parse(localStorage.getItem('userProjects')) || {};
       userProjects[username] = [];
       localStorage.setItem('userProjects', JSON.stringify(userProjects));
@@ -39,7 +38,7 @@ const SignUp = ({ handleSignIn }) => {
       handleSignIn();
       navigate('/HOME/home');
     } else {
-      
+      setErrorMessage('Please fill out all fields');
     }
   };
 
@@ -61,15 +60,16 @@ const SignUp = ({ handleSignIn }) => {
   };
 
   return (
-    <div>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSignUp}>
+    <div className="p-4">
+      <h2 className="text-xl font-semibold">Sign Up</h2>
+      <form onSubmit={handleSignUp} className="mt-4 space-y-4">
         <input
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
+          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
         />
         <input
           type="email"
@@ -77,6 +77,7 @@ const SignUp = ({ handleSignIn }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
         />
         <input
           type="password"
@@ -84,10 +85,16 @@ const SignUp = ({ handleSignIn }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
         />
-        <label>
+        <label className="block">
           Gender:
-          <select value={gender} onChange={(e) => setGender(e.target.value)} required>
+          <select
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            required
+            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+          >
             <option value="">Select Gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -98,16 +105,22 @@ const SignUp = ({ handleSignIn }) => {
           type="file"
           accept="image/*"
           onChange={handleFileChange}
+          className="w-full"
         />
         {profilePic ? (
-          <img src={profilePic} alt="Profile" />
+          <img src={profilePic} alt="Profile" className="max-w-full h-auto mt-2" />
         ) : (
-          <img src={getDefaultProfilePic()} alt="Default Profile" />
+          <img src={getDefaultProfilePic()} alt="Default Profile" className="max-w-full h-auto mt-2" />
         )}
 
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        
-        <button type="submit">Sign Up</button>
+        {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded block w-full focus:outline-none hover:bg-blue-600"
+        >
+          Sign Up
+        </button>
       </form>
     </div>
   );

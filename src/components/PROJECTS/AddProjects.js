@@ -42,49 +42,57 @@ function AddProjects() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded shadow-md">
       <input
         type="text"
         placeholder="Project Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        className="w-full mb-4 p-2 border rounded"
       />
       <textarea
         placeholder="Project Description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        className="w-full mb-4 p-2 border rounded"
       />
+      <div className="mb-4">
+        <h3 className="mb-2 text-lg font-semibold">Steps</h3>
+        {steps.map((step, index) => (
+          <div key={index} className="mb-2">
+            <input
+              type="text"
+              placeholder={`Step ${index + 1}`}
+              value={step.name}
+              onChange={(e) => handleStepChange(index, e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+        ))}
+        <button type="button" onClick={handleAddStep} className="px-4 py-2 text-white bg-blue-500 rounded">
+          Add Step
+        </button>
+      </div>
       <input
         type="date"
         placeholder="Start Date"
         value={startDate}
         onChange={(e) => setStartDate(e.target.value)}
+        className="w-full mb-4 p-2 border rounded"
       />
       <input
         type="date"
         placeholder="Due Date"
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
+        className="w-full mb-4 p-2 border rounded"
       />
-      <div>
-        <h3>Steps</h3>
-        {steps.map((step, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              placeholder={`Step ${index + 1}`}
-              value={step.name}
-              onChange={(e) => handleStepChange(index, e.target.value)}
-            />
-          </div>
-        ))}
-        <button type="button" onClick={handleAddStep}>
-          Add Step
-        </button>
-      </div>
-      <button type="submit">Add Project</button>
+      <button type="submit" className="w-full px-4 py-2 text-white bg-blue-500 rounded">
+        Add Project
+      </button>
     </form>
   );
+  
 }
 
 export default AddProjects;
