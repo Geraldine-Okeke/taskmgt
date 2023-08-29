@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useProjects } from './ProjectsContext';
 
-function ViewProjects({ authenticated }) {
-  const { projects, deleteProject, username, setProjects } = useProjects();
+function ViewProjects() {
+  const { projects, deleteProject, setProjects } = useProjects();
 
   const handleToggleStep = (projectIndex, stepIndex) => {
     const updatedProjects = [...projects];
     updatedProjects[projectIndex].steps[stepIndex].completed = !updatedProjects[projectIndex].steps[stepIndex].completed;
     setProjects(updatedProjects);
   };
-
-  const userProjects = projects.filter((project) => project.addedBy === username);
 
   const calculatePercentage = (completedSteps, totalSteps) => {
     if (totalSteps === 0) {
@@ -39,11 +37,11 @@ function ViewProjects({ authenticated }) {
         clearInterval(animationInterval);
       }
       setAnimatedProgress((prevProgress) => ({ ...prevProgress, [projectIndex]: currentProgress }));
-    }, 20); // Adjust the interval as needed for smoother animation
+    }, 20); 
   };
 
   useEffect(() => {
-    userProjects.forEach((project, projectIndex) => {
+    projects.forEach((project, projectIndex) => {
       const completedSteps = project.steps.filter((step) => step.completed).length;
       const totalSteps = project.steps.length;
       const progressPercentage = calculatePercentage(completedSteps, totalSteps);
@@ -52,31 +50,32 @@ function ViewProjects({ authenticated }) {
         animateProgress(projectIndex, progressPercentage);
       }
     });
-  }, [animatedProgress, userProjects]);
+  }, [animatedProgress, projects]);
 
   useEffect(() => {
-    userProjects.forEach((project, projectIndex) => {
+    projects.forEach((project, projectIndex) => {
       const completedSteps = project.steps.filter((step) => step.completed).length;
       const totalSteps = project.steps.length;
       const progressPercentage = calculatePercentage(completedSteps, totalSteps);
 
       if (progressPercentage === 100) {
-        const shouldDelete = window.confirm(`The project "${project.name}" is marked as completed. Do you want to delete it?`);
-        if (shouldDelete) {
+        const Delete = window.confirm('This project is completed, should it be deleted ?');
+        if (Delete){
           deleteProject(projectIndex);
         }
+        
       }
     });
-  }, [userProjects, deleteProject]);
+  }, [projects, deleteProject]);
 
   return (
     <div className="p-4 space-y-4">
       <h2 className="text-xl font-semibold">View Current Projects</h2>
-      {userProjects.length === 0 ? (
-        <p>You have no projects, take care</p>
+      {projects.length === 0 ? (
+        <p>No projects available.</p>
       ) : (
         <ul className="space-y-4">
-          {userProjects.map((project, projectIndex) => {
+          {projects.map((project, projectIndex) => {
             const completedSteps = project.steps.filter((step) => step.completed).length;
             const totalSteps = project.steps.length;
             const progressPercentage = calculatePercentage(completedSteps, totalSteps);
@@ -85,14 +84,16 @@ function ViewProjects({ authenticated }) {
               <li key={projectIndex} className="border rounded p-4 space-y-4">
                 <div className="flex justify-between items-center">
                   <button onClick={() => setVisibleSteps((prevVisibleSteps) => ({ ...prevVisibleSteps, [projectIndex]: !prevVisibleSteps[projectIndex] }))} className="text-blue-500 hover:underline focus:outline-none">
-                    {project.name}
+                    Project Name: {project.name}
                   </button>
+                  
                   {project.name && project.description && (
                     <span className="text-gray-600"> (Start: {project.startDate}, Due: {project.dueDate})</span>
                   )}
                 </div>
-                {authenticated && project.name && project.description && (
+                {project.name && project.description && (
                   <div className="flex flex-col space-y-2">
+                    <p>Project Descrption: {project.description}</p>
                     <button onClick={() => handleDeleteProject(projectIndex)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 focus:outline-none">
                       Delete Project
                     </button>

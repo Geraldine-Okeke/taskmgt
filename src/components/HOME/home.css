@@ -1,7 +1,6 @@
 body{
-  background-image: url("./Images/taskMgt_bg.jpg");
-  background-size: cover;
-  background-repeat: no-repeat;
+  background-color: black;
+  color:white;
   margin: 0;
   padding: 0;
   width: 100%;

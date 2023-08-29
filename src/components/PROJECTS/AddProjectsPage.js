@@ -12,7 +12,7 @@ function AddProjectPage() {
   
   return (
     <div>
-      <h2>Add Project</h2>
+      <h2 className='font-bold text-3xl text-center p-4'>Add Project</h2>
       <AddProjects addProject={handleAddProject} /> 
     </div>
   );
