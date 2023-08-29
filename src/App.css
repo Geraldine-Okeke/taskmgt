@@ -6,6 +6,10 @@
   background-color: #1a1a1a; /* Set your dark mode background color */
   color: #ffffff; /* Set your dark mode text color */
 }
+.light-mode{
+  background-color: white;
+  color: black;
+}
 
 /* Dark mode toggle switch */
 .dark-mode-toggle {

@@ -14,6 +14,7 @@ export default function App() {
 
   
   return (
+    
     <ProjectsProvider>
       <Router>
       <DarkModeToggle />

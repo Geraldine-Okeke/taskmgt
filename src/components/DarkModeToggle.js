@@ -8,7 +8,7 @@ function DarkModeToggle() {
     if (darkMode) {
       body.classList.add('dark-mode');
     } else {
-      body.classList.remove('dark-mode');
+      body.classList.add('light-mode');
     }
   }, [darkMode]);
 
