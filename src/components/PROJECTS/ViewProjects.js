@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useProjects } from './ProjectsContext';
+import { useProjects} from './ProjectsContext';
 
 function ViewProjects() {
-  const { projects, deleteProject, setProjects } = useProjects();
+  const { projects, deleteProject,setProjects } = useProjects();
 
   const handleToggleStep = (projectIndex, stepIndex) => {
     const updatedProjects = [...projects];
     updatedProjects[projectIndex].steps[stepIndex].completed = !updatedProjects[projectIndex].steps[stepIndex].completed;
     setProjects(updatedProjects);
   };
+  useEffect(() => {
+    // Load saved projects from Local Storage on component mount
+    const savedProjects = JSON.parse(localStorage.getItem('savedProjects') || '[]');
+    setProjects(savedProjects); // Load projects into state
+  }, [setProjects]); 
+  // Save projects to Local Storage whenever the projects state changes
+  useEffect(() => {
+    localStorage.setItem('savedProjects', JSON.stringify(projects));
+  }, [projects])
 
   const calculatePercentage = (completedSteps, totalSteps) => {
     if (totalSteps === 0) {
@@ -23,11 +32,9 @@ function ViewProjects() {
   const handleDeleteProject = (index) => {
     const shouldDelete = window.confirm('Are you sure you want to delete this project?');
     if (shouldDelete) {
-      const updatedProjects = projects.filter((_, projectIndex) => projectIndex !== index);
-      setProjects(updatedProjects);
+      deleteProject(index);
     }
   };
-
   const animateProgress = (projectIndex, progress) => {
     setAnimatedProgress((prevProgress) => ({ ...prevProgress, [projectIndex]: 0 }));
     let currentProgress = 0;

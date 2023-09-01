@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useProjects } from './ProjectsContext'; 
 
@@ -11,6 +11,17 @@ function AddProjects() {
   const [steps, setSteps] = useState([]);
   const [stepInput, setStepInput] = useState('');
 
+  // Load saved steps from Local Storage on component mount
+  useEffect(() => {
+    const savedSteps = JSON.parse(localStorage.getItem('savedSteps') || '[]');
+    setSteps(savedSteps);
+  }, []);
+
+  // Save steps to Local Storage whenever the steps state changes
+  useEffect(() => {
+    localStorage.setItem('savedSteps', JSON.stringify(steps));
+  }, [steps]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -22,6 +33,9 @@ function AddProjects() {
       setDueDate('');
       setSteps([]);
 
+      // Clear saved steps from Local Storage after adding the project
+      localStorage.removeItem('savedSteps');
+
       toast.success('Project added successfully!');
     } else {
       toast.error('Please provide both project name and description.');
@@ -29,7 +43,7 @@ function AddProjects() {
   };
 
   const handleAddStep = () => {
-    if (steps.length < 10 && stepInput.trim() !== '') {
+    if (steps.length < 30 && stepInput.trim() !== '') {
       setSteps([...steps, { name: stepInput, completed: false }]);
       setStepInput('');
     } else if (stepInput.trim() === '') {
@@ -44,6 +58,7 @@ function AddProjects() {
     updatedSteps[index].name = newName;
     setSteps(updatedSteps);
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded shadow-md">
@@ -84,8 +99,8 @@ function AddProjects() {
         <button
           type="button"
           onClick={handleAddStep}
-          className="px-4 py-2 text-white bg-blue-500 rounded"
-          disabled={stepInput.trim() === '' || steps.length >= 10}
+          className="px-4 py-2  bg-blue-500 rounded"
+          disabled={stepInput.trim() === '' || steps.length >= 30}
         >
           Add Step
         </button>

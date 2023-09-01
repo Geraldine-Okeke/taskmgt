@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
 function DarkModeToggle() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     const body = document.body;
     if (darkMode) {
       body.classList.add('dark-mode');
     } else {
-      body.classList.add('light-mode');
+      body.classList.remove('dark-mode');
     }
   }, [darkMode]);
 

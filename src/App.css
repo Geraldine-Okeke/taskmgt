@@ -4,7 +4,7 @@
 
 .dark-mode {
   background-color: #1a1a1a; /* Set your dark mode background color */
-  color: #ffffff; /* Set your dark mode text color */
+  color: rgb(62, 62, 236); /* Set your dark mode text color */
 }
 .light-mode{
   background-color: white;

@@ -1,5 +1,3 @@
-// ProjectsContext.js
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ProjectsContext = createContext();
@@ -9,48 +7,39 @@ export function useProjects() {
 }
 
 export function ProjectsProvider({ children }) {
-  const [projects, setProjects] = useState([]);
-  const [profilePic, setProfilePic] = useState(null);
-  const [username, setUsername] = useState('');
+  // Initialize the projects state with the data from Local Storage or an empty array
+  const [projects, setProjects] = useState(() => {
+    const savedProjects = JSON.parse(localStorage.getItem('savedProjects') || '[]');
+    return savedProjects;
+  });
 
   useEffect(() => {
-    const storedProfilePic = localStorage.getItem('profilePic');
-    const storedUsername = localStorage.getItem('username');
-    setProfilePic(storedProfilePic);
-    setUsername(storedUsername);
-  }, []);
+    // No need to conditionally set the projects state here
+    // The initial state is already set using functional state update
+    localStorage.setItem('savedProjects', JSON.stringify(projects));
+  }, [projects]);
 
   const addProject = (name, description, startDate, dueDate, steps) => {
-    const userKey = username || 'guest';
     const newProject = {
       name,
       description,
       startDate,
       dueDate,
-      addedBy: username,
-      steps, // Include steps property          
+      steps,
     };
 
-    const existingUserProjects = JSON.parse(localStorage.getItem(userKey)) || [];
-
-    const updatedUserProjects = [...existingUserProjects, newProject];
-
-    localStorage.setItem(userKey, JSON.stringify(updatedUserProjects));
-
-    setProjects(updatedUserProjects);
+    // Use functional state update to avoid the re-render loop
+    setProjects((prevProjects) => [...prevProjects, newProject]);
   };
 
   const deleteProject = (index) => {
-    const userKey = username || 'guest';
-    const existingUserProjects = JSON.parse(localStorage.getItem(userKey)) || [];
-    const updatedUserProjects = existingUserProjects.filter((_, i) => i !== index);
-    localStorage.setItem(userKey, JSON.stringify(updatedUserProjects));
-    setProjects(updatedUserProjects);
+    // Use functional state update to avoid the re-render loop
+    setProjects((prevProjects) => prevProjects.filter((_, projectIndex) => projectIndex !== index));
   };
 
   return (
     <ProjectsContext.Provider
-      value={{ projects, addProject, deleteProject, profilePic, username,setProjects }}
+      value={{ projects, addProject, deleteProject, setProjects }}
     >
       {children}
     </ProjectsContext.Provider>
