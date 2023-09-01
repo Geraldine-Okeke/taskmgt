@@ -1,10 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useProjects } from "./ProjectsContext";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import EditProjectModal from "./EditProjectModal"
 function ViewProjects() {
   const { projects, deleteProject, setProjects } = useProjects();
+  const [calendarAspectRatio, setCalendarAspectRatio] = useState(1);
+
+  const calendarRef = useRef(null);
+
+  useEffect(() => {
+    // Calculate and set the aspect ratio based on the screen width
+    const screenWidth = window.innerWidth;
+
+    if (screenWidth < 540) {
+      setCalendarAspectRatio(1);
+    } else {
+      setCalendarAspectRatio(3);
+    }
+  }, []);
   const [editingProject, setEditingProject] = useState(null);
   const handleEditProject = (editedProject) => {
     const projectIndex = projects.findIndex(
@@ -121,22 +135,24 @@ function ViewProjects() {
       </div>
     );
   };
-
+  
 
 
   return (
     <>
-      <div className="w-screen h-1/2 overflow-hidden">
+     <div className="w-screen h-1/2 md:h-2/4 overflow-hidden">
         <FullCalendar
+          ref={calendarRef}
           plugins={[dayGridPlugin]}
           initialView="dayGridMonth"
-          className="w-full h-64"
-          events={calendarEvents} // Pass the events data to FullCalendar
+          className={`w-full h-64 responsive-calendar`}
+          events={calendarEvents}
           dayCellContent={dayCellContent}
-          aspectRatio={3.0}
+          aspectRatio={calendarAspectRatio}
           dayMaxEventRows={true}
         />
       </div>
+
       <div className="p-4 space-y-4 mt-20">
       <h2 className="text-xl font-semibold">View Current Projects</h2>
       {projects.length === 0 ? (

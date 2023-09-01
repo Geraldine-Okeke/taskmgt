@@ -1,7 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+body{
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
 .dark-mode {
   background-color: #1a1a1a; /* Set your dark mode background color */
   color: rgb(62, 62, 236); /* Set your dark mode text color */
@@ -62,4 +65,13 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(20px);
+}
+
+.responsive-calendar {
+  aspect-ratio: 10 / 1; /* Default aspect ratio for small screens */
+
+  @media (min-width: 640px) {
+    /* Adjust the aspect ratio for screens wider than 640px */
+    aspect-ratio: 2 / 1;
+  }
 }
