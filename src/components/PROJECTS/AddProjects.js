@@ -108,23 +108,30 @@ function AddProjects() {
           <p className="text-red-500">Please add a step before clicking "Add Step".</p>
         )}
       </div>
-      <label htmlFor='Sdate'>Start Date</label>
-      <input
-        id='Sdate'
-        type="date"
-        placeholder="Start Date"
-        value={startDate}
-        onChange={(e) => setStartDate(e.target.value)}
-        className="w-full mb-4 p-4 border rounded"
-      />
-      <label htmlFor='Ddate'>Due Date</label>
-      <input
-        type="date"
-        placeholder="Due Date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-        className="w-full mb-4 p-4 border rounded"
-      />
+      <label htmlFor="Sdate" className="block text-sm font-medium text-gray-700">
+          Start Date
+        </label>
+        <input
+          id="Sdate"
+          type="date"
+          placeholder="Start Date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="w-full mb-2 p-2 md:p-4 border rounded"
+        />
+
+        <label htmlFor="Ddate" className="block text-sm font-medium text-gray-700">
+          Due Date
+        </label>
+        <input
+          id="Ddate"
+          type="date"
+          placeholder="Due Date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="w-full mb-2 p-2 md:p-4 border rounded"
+        />
+
       <button type="submit" className="w-full px-4 py-2 text-white bg-blue-500 rounded">
         Add Project
       </button>

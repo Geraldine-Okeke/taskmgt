@@ -2,7 +2,7 @@ import React, { useEffect, useState,useRef } from "react";
 import { useProjects } from "./ProjectsContext";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import EditProjectModal from "./EditProjectModal"
+import EditProject from "./EditProject";
 function ViewProjects() {
   const { projects, deleteProject, setProjects } = useProjects();
   const [calendarAspectRatio, setCalendarAspectRatio] = useState(1);
@@ -13,25 +13,13 @@ function ViewProjects() {
     // Calculate and set the aspect ratio based on the screen width
     const screenWidth = window.innerWidth;
 
-    if (screenWidth < 540) {
-      setCalendarAspectRatio(1);
+    if (screenWidth <= 540) {
+      setCalendarAspectRatio(0.8);
     } else {
-      setCalendarAspectRatio(3);
+      setCalendarAspectRatio(4);
     }
   }, []);
-  const [editingProject, setEditingProject] = useState(null);
-  const handleEditProject = (editedProject) => {
-    const projectIndex = projects.findIndex(
-      (project) => project.id === editedProject.id
-    );
-
-    if (projectIndex !== -1) {
-      const updatedProjects = [...projects];
-      updatedProjects[projectIndex] = editedProject;
-      setProjects(updatedProjects);
-      setEditingProject(null); 
-    }
-  };
+ 
   const handleToggleStep = (projectIndex, stepIndex) => {
     const updatedProjects = [...projects];
     updatedProjects[projectIndex].steps[stepIndex].completed =
@@ -136,11 +124,32 @@ function ViewProjects() {
     );
   };
   
-
+  const [editingProject, setEditingProject] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const handleOpenEditModal = (projectToEdit) => {
+    setEditingProject(projectToEdit);
+    setIsEditModalOpen(true);
+  };
+  const handleSaveEditedProject = (editedProject) => {
+    // Find the index of the edited project in the projects array
+    const projectIndex = projects.findIndex((project) => project.id === editedProject.id);
+  
+    if (projectIndex !== -1) {
+      // Create a copy of the projects array and replace the edited project
+      const updatedProjects = [...projects];
+      updatedProjects[projectIndex] = editedProject;
+  
+      // Update the projects state with the edited project
+      setProjects(updatedProjects);
+    }
+  
+    // Close the edit modal
+    setIsEditModalOpen(false);
+  };
 
   return (
     <>
-     <div className="w-screen h-1/2 md:h-2/4 overflow-hidden">
+     <div className="w-screen h-1/2 md:h-2/4 overflow-hidden pt-10">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin]}
@@ -170,8 +179,12 @@ function ViewProjects() {
             );
 
             return (
-              <li key={projectIndex} className="border rounded p-4 space-y-4">
-                <div className="flex justify-between items-center">
+              <li
+              key={projectIndex}
+              className="border rounded p-2 md:p-4 space-y-4" // Adjust padding for medium screens
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between">
+                <div className="mb-2 md:mb-0">
                   <button
                     onClick={() =>
                       setVisibleSteps((prevVisibleSteps) => ({
@@ -183,75 +196,86 @@ function ViewProjects() {
                   >
                     Project Name: {project.name}
                   </button>
-                  {editingProject && (
-                      <EditProjectModal
-                        project={editingProject}
-                        onSave={handleEditProject}
-                        onCancel={() => setEditingProject(null)}
-                      />
-                    )}
-                  {project.name && project.description && (
-                      <span className="text-gray-600">
-                        {" "}
-                        (Start: {project.startDate}, Due: {project.dueDate})
-                        {progressPercentage === 100 && (
-                          <span className="text-green-600 ml-2">(Completed)</span>
-                        )}
-                      </span>
-                    )}
+                  <button
+                    onClick={() => handleOpenEditModal(project)}
+                    className="text-blue-500 hover:underline ml-10 focus:outline-none md:ml-2" // Add margin for medium screens
+                  >
+                    Edit
+                  </button>
                 </div>
-                {project.name && project.description && (
-                  <div className="flex flex-col space-y-2">
-                    <p>Project Descrption: {project.description}</p>
-                    <button
-                      onClick={() => handleDeleteProject(projectIndex)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 focus:outline-none"
-                    >
-                      Delete Project
-                    </button>
-                    
-                    <span className="text-green-600">
-                      Progress:{" "}
-                      {animatedProgress[projectIndex] !== undefined
-                        ? animatedProgress[projectIndex]
-                        : progressPercentage.toFixed(2)}
-                      %
-                    </span>
-                    <div className="w-full h-2 bg-gray-200 rounded">
-                      <div
-                        style={{
-                          width: `${
-                            animatedProgress[projectIndex] !== undefined
-                              ? animatedProgress[projectIndex]
-                              : progressPercentage
-                          }%`,
-                        }}
-                        className="h-full bg-blue-500 rounded transition-width duration-200"
-                      ></div>
+                {isEditModalOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="bg-white p-4 rounded-lg shadow-md">
+                      <EditProject
+                        project={editingProject}
+                        onSave={handleSaveEditedProject}
+                        onCancel={() => setIsEditModalOpen(false)}
+                      />
                     </div>
                   </div>
                 )}
 
-                {visibleSteps[projectIndex] && project.steps && (
-                  <ul className="space-y-2">
-                    {project.steps.map((step, stepIndex) => (
-                      <li key={stepIndex}>
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={step.completed}
-                            onChange={() =>
-                              handleToggleStep(projectIndex, stepIndex)
-                            }
-                            className="form-checkbox text-blue-500 focus:ring-blue-400"
-                          />
-                          <span>{step.name}</span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
+                {project.name && project.description && (
+                  <span className="text-gray-600 mt-2 md:mt-0 md:ml-2"> {/* Adjust margin for medium screens */}
+                    (Start: {project.startDate}, Due: {project.dueDate})
+                    {progressPercentage === 100 && (
+                      <span className="text-green-600 ml-2">(Completed)</span>
+                    )}
+                  </span>
                 )}
-              </li>
+              </div>
+              {project.name && project.description && (
+                <div className="flex flex-col space-y-2 mt-2"> {/* Adjust margin for medium screens */}
+                  <p>Project Description: {project.description}</p>
+                  <button
+                    onClick={() => handleDeleteProject(projectIndex)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 focus:outline-none"
+                  >
+                    Delete Project
+                  </button>
+                  <span className="text-green-600">
+                    Progress:{" "}
+                    {animatedProgress[projectIndex] !== undefined
+                      ? animatedProgress[projectIndex]
+                      : progressPercentage.toFixed(2)}
+                    %
+                  </span>
+                  <div className="w-full h-2 bg-gray-200 rounded">
+                    <div
+                      style={{
+                        width: `${
+                          animatedProgress[projectIndex] !== undefined
+                            ? animatedProgress[projectIndex]
+                            : progressPercentage
+                        }%`,
+                      }}
+                      className="h-full bg-blue-500 rounded transition-width duration-200"
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {visibleSteps[projectIndex] && project.steps && (
+                <ul className="space-y-2 mt-2"> {/* Adjust margin for medium screens */}
+                  {project.steps.map((step, stepIndex) => (
+                    <li key={stepIndex}>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={step.completed}
+                          onChange={() =>
+                            handleToggleStep(projectIndex, stepIndex)
+                          }
+                          className="form-checkbox text-blue-500 focus:ring-blue-400"
+                        />
+                        <span>{step.name}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+
             );
           })}
         </ul>
