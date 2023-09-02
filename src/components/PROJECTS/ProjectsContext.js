@@ -7,15 +7,12 @@ export function useProjects() {
 }
 
 export function ProjectsProvider({ children }) {
-  // Initialize the projects state with the data from Local Storage or an empty array
   const [projects, setProjects] = useState(() => {
     const savedProjects = JSON.parse(localStorage.getItem('savedProjects') || '[]');
     return savedProjects;
   });
 
   useEffect(() => {
-    // No need to conditionally set the projects state here
-    // The initial state is already set using functional state update
     localStorage.setItem('savedProjects', JSON.stringify(projects));
   }, [projects]);
 
@@ -28,12 +25,10 @@ export function ProjectsProvider({ children }) {
       steps,
     };
 
-    // Use functional state update to avoid the re-render loop
     setProjects((prevProjects) => [...prevProjects, newProject]);
   };
 
   const deleteProject = (index) => {
-    // Use functional state update to avoid the re-render loop
     setProjects((prevProjects) => prevProjects.filter((_, projectIndex) => projectIndex !== index));
   };
 

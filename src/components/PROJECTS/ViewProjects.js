@@ -92,7 +92,6 @@ function ViewProjects() {
 
   
 
-  // Format projects data into an array of events for FullCalendar
   const calendarEvents = projects.map((project) => {
     const completedSteps = project.steps.filter((step) => step.completed).length;
     const totalSteps = project.steps.length;
@@ -119,7 +118,6 @@ function ViewProjects() {
     return (
       <div className="text-xs font-semibold">
         {formattedDate}
-        {/* You can add more styles or content here */}
       </div>
     );
   };
@@ -131,19 +129,15 @@ function ViewProjects() {
     setIsEditModalOpen(true);
   };
   const handleSaveEditedProject = (editedProject) => {
-    // Find the index of the edited project in the projects array
     const projectIndex = projects.findIndex((project) => project.id === editedProject.id);
   
     if (projectIndex !== -1) {
-      // Create a copy of the projects array and replace the edited project
       const updatedProjects = [...projects];
       updatedProjects[projectIndex] = editedProject;
   
-      // Update the projects state with the edited project
       setProjects(updatedProjects);
     }
   
-    // Close the edit modal
     setIsEditModalOpen(false);
   };
 
