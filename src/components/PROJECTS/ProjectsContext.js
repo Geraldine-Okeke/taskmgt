@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
 const ProjectsContext = createContext();
 
 export function useProjects() {
@@ -16,14 +15,16 @@ export function ProjectsProvider({ children }) {
     localStorage.setItem('savedProjects', JSON.stringify(projects));
   }, [projects]);
 
-  const addProject = (name, description, startDate, dueDate, steps) => {
+  const addProject = (projectId, name, description, startDate, dueDate, steps) => {
     const newProject = {
+      id: projectId, 
       name,
       description,
       startDate,
       dueDate,
       steps,
     };
+
 
     setProjects((prevProjects) => [...prevProjects, newProject]);
   };

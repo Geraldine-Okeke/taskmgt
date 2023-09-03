@@ -1,16 +1,111 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useProjects } from "./ProjectsContext";
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import EditProject from "./EditProject";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+
 function ViewProjects() {
   const { projects, deleteProject, setProjects } = useProjects();
   const [calendarAspectRatio, setCalendarAspectRatio] = useState(1);
 
   const calendarRef = useRef(null);
 
+  const loggedProjectIds = useRef(false); // Use a ref to track if IDs are logged
+
+  // State to track which project is currently being edited
+  const [editingProjectId, setEditingProjectId] = useState(null);
+
+  // State to track edited name, description, start date, and due date
+  const [editedName, setEditedName] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+  const [editedStartDate, setEditedStartDate] = useState("");
+  const [editedDueDate, setEditedDueDate] = useState("");
+  const [editingSteps, setEditingSteps] = useState([]);
+  const [newStepName, setNewStepName] = useState("");
+  
+  // Function to handle the "Edit" button click
+  const handleEditClick = (projectId) => {
+    // Find the project to edit based on the projectId
+    const projectToEdit = projects.find((project) => project.id === projectId);
+
+    // Set the edited values with the current values
+    setEditedName(projectToEdit.name);
+    setEditedDescription(projectToEdit.description);
+    setEditedStartDate(projectToEdit.startDate);
+    setEditedDueDate(projectToEdit.dueDate);
+
+    // Set the editingProjectId to the projectId to identify the project being edited
+    setEditingProjectId(projectId);
+
+    // Set the editing steps for the project
+    setEditingSteps(projectToEdit.steps);
+  };
+
+
+  // Function to handle form submission for editing
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+
+    // Find the project being edited based on editingProjectId
+    const projectToEdit = projects.find(
+      (project) => project.id === editingProjectId
+    );
+
+    // Update the project with the edited values
+    projectToEdit.name = editedName;
+    projectToEdit.description = editedDescription;
+    projectToEdit.startDate = editedStartDate;
+    projectToEdit.dueDate = editedDueDate;
+    projectToEdit.steps = editingSteps;
+
+    // Update the projects array in the context
+    setProjects([...projects]);
+
+    // Reset the editing state
+    setEditingProjectId(null);
+    setEditedName("");
+    setEditedDescription("");
+    setEditedStartDate("");
+    setEditedDueDate("");
+    setEditingSteps([]);
+  };
+  const handleAddStep = () => {
+    if (newStepName.trim() !== "") {
+      setEditingSteps([...editingSteps, { name: newStepName, completed: false }]);
+      setNewStepName("");
+    }
+  };
+
+  // Function to handle removing a step by index
+  const handleRemoveStep = (stepIndex) => {
+    const updatedSteps = [...editingSteps];
+    updatedSteps.splice(stepIndex, 1);
+    setEditingSteps(updatedSteps);
+  };
+  const handleEditToggleStep = (stepIndex) => {
+    const updatedSteps = [...editingSteps];
+    updatedSteps[stepIndex].completed = !updatedSteps[stepIndex].completed;
+    setEditingSteps(updatedSteps);
+  };
+
   useEffect(() => {
-    // Calculate and set the aspect ratio based on the screen width
+    if (!loggedProjectIds.current) {
+      projects.forEach((project) => {
+        console.log("Project ID:", project.id);
+      });
+      loggedProjectIds.current = true; 
+    }
+  }, [projects]);
+  const handleCancelEdit = () => {
+    // Reset the editing state
+    setEditingProjectId(null);
+    setEditedName("");
+    setEditedDescription("");
+    setEditedStartDate("");
+    setEditedDueDate("");
+    
+  };
+  useEffect(() => {
+    
     const screenWidth = window.innerWidth;
 
     if (screenWidth <= 540) {
@@ -19,13 +114,15 @@ function ViewProjects() {
       setCalendarAspectRatio(4);
     }
   }, []);
- 
+
   const handleToggleStep = (projectIndex, stepIndex) => {
     const updatedProjects = [...projects];
     updatedProjects[projectIndex].steps[stepIndex].completed =
       !updatedProjects[projectIndex].steps[stepIndex].completed;
     setProjects(updatedProjects);
   };
+
+
   useEffect(() => {
     // Load saved projects from Local Storage on component mount
     const savedProjects = JSON.parse(
@@ -33,7 +130,7 @@ function ViewProjects() {
     );
     setProjects(savedProjects); // Load projects into state
   }, [setProjects]);
-  // Save projects to Local Storage whenever the projects state changes
+
   useEffect(() => {
     localStorage.setItem("savedProjects", JSON.stringify(projects));
   }, [projects]);
@@ -56,6 +153,7 @@ function ViewProjects() {
       deleteProject(index);
     }
   };
+
   const animateProgress = (projectIndex, progress) => {
     setAnimatedProgress((prevProgress) => ({
       ...prevProgress,
@@ -73,6 +171,7 @@ function ViewProjects() {
       }));
     }, 20);
   };
+
   useEffect(() => {
     projects.forEach((project, projectIndex) => {
       const completedSteps = project.steps.filter(
@@ -90,17 +189,17 @@ function ViewProjects() {
     });
   }, [animatedProgress, projects]);
 
-  
-
   const calendarEvents = projects.map((project) => {
-    const completedSteps = project.steps.filter((step) => step.completed).length;
+    const completedSteps = project.steps.filter((step) => step.completed)
+      .length;
     const totalSteps = project.steps.length;
-    const progressPercentage = calculatePercentage(completedSteps, totalSteps);
+    const progressPercentage = calculatePercentage(
+      completedSteps,
+      totalSteps
+    );
 
-   
     const isCompleted = progressPercentage === 100;
 
-    
     const projectTitle = isCompleted
       ? `${project.name} (Completed)`
       : project.name;
@@ -108,47 +207,25 @@ function ViewProjects() {
     return {
       title: projectTitle,
       start: project.startDate,
-      
     };
   });
+
   const dayCellContent = (arg) => {
     const date = new Date(arg.date);
     const formattedDate = date.getDate();
 
     return (
-      <div className="text-xs font-semibold">
-        {formattedDate}
-      </div>
+      <div className="text-xs font-semibold">{formattedDate}</div>
     );
-  };
-  
-  const [editingProject, setEditingProject] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const handleOpenEditModal = (projectToEdit) => {
-    setEditingProject(projectToEdit);
-    setIsEditModalOpen(true);
-  };
-  const handleSaveEditedProject = (editedProject) => {
-    const projectIndex = projects.findIndex((project) => project.id === editedProject.id);
-  
-    if (projectIndex !== -1) {
-      const updatedProjects = [...projects];
-      updatedProjects[projectIndex] = editedProject;
-  
-      setProjects(updatedProjects);
-    }
-  
-    setIsEditModalOpen(false);
   };
 
   return (
     <>
-     <div className="w-screen h-1/2 md:h-2/4 overflow-hidden pt-10">
+      <div className="w-screen h-1/2 md:h-2/4 overflow-hidden pt-10">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin]}
           initialView="dayGridMonth"
-          className={`w-full h-64 responsive-calendar`}
           events={calendarEvents}
           dayCellContent={dayCellContent}
           aspectRatio={calendarAspectRatio}
@@ -157,126 +234,230 @@ function ViewProjects() {
       </div>
 
       <div className="p-4 space-y-4 mt-20">
-      <h2 className="text-xl font-semibold">View Current Projects</h2>
-      {projects.length === 0 ? (
-        <p>No projects available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {projects.map((project, projectIndex) => {
-            const completedSteps = project.steps.filter(
-              (step) => step.completed
-            ).length;
-            const totalSteps = project.steps.length;
-            const progressPercentage = calculatePercentage(
-              completedSteps,
-              totalSteps
-            );
+        <h2 className="text-xl font-semibold">View Current Projects</h2>
+        {projects.length === 0 ? (
+          <p>No projects available.</p>
+        ) : (
+          <ul className="space-y-4">
+            {projects.map((project, projectIndex) => {
+              const completedSteps = project.steps.filter(
+                (step) => step.completed
+              ).length;
+              const totalSteps = project.steps.length;
+              const progressPercentage = calculatePercentage(
+                completedSteps,
+                totalSteps
+              );
 
-            return (
-              <li
-              key={projectIndex}
-              className="border rounded p-2 md:p-4 space-y-4" // Adjust padding for medium screens
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between">
-                <div className="mb-2 md:mb-0">
-                  <button
-                    onClick={() =>
-                      setVisibleSteps((prevVisibleSteps) => ({
-                        ...prevVisibleSteps,
-                        [projectIndex]: !prevVisibleSteps[projectIndex],
-                      }))
-                    }
-                    className="text-blue-500 hover:underline focus:outline-none"
-                  >
-                    Project Name: {project.name}
-                  </button>
-                  <button
-                    onClick={() => handleOpenEditModal(project)}
-                    className="text-blue-500 hover:underline ml-10 focus:outline-none md:ml-2" // Add margin for medium screens
-                  >
-                    Edit
-                  </button>
-                </div>
-                {isEditModalOpen && (
-                  <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className="bg-white p-4 rounded-lg shadow-md">
-                      <EditProject
-                        project={editingProject}
-                        onSave={handleSaveEditedProject}
-                        onCancel={() => setIsEditModalOpen(false)}
-                      />
+              return (
+                <li
+                  key={projectIndex}
+                  className="border rounded p-2 md:p-4 space-y-4"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between">
+                    <div className="mb-2 md:mb-0">
+                      <button
+                        onClick={() =>
+                          setVisibleSteps((prevVisibleSteps) => ({
+                            ...prevVisibleSteps,
+                            [projectIndex]: !prevVisibleSteps[projectIndex],
+                          }))
+                        }
+                        className="text-blue-500 hover:underline focus:outline-none"
+                      >
+                        Project Name: {project.name}
+                      </button>
                     </div>
-                  </div>
-                )}
 
-                {project.name && project.description && (
-                  <span className="text-gray-600 mt-2 md:mt-0 md:ml-2"> {/* Adjust margin for medium screens */}
-                    (Start: {project.startDate}, Due: {project.dueDate})
-                    {progressPercentage === 100 && (
-                      <span className="text-green-600 ml-2">(Completed)</span>
-                    )}
-                  </span>
-                )}
-              </div>
-              {project.name && project.description && (
-                <div className="flex flex-col space-y-2 mt-2"> {/* Adjust margin for medium screens */}
-                  <p>Project Description: {project.description}</p>
-                  <button
-                    onClick={() => handleDeleteProject(projectIndex)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 focus:outline-none"
-                  >
-                    Delete Project
-                  </button>
-                  <span className="text-green-600">
-                    Progress:{" "}
-                    {animatedProgress[projectIndex] !== undefined
-                      ? animatedProgress[projectIndex]
-                      : progressPercentage.toFixed(2)}
-                    %
-                  </span>
-                  <div className="w-full h-2 bg-gray-200 rounded">
-                    <div
-                      style={{
-                        width: `${
-                          animatedProgress[projectIndex] !== undefined
-                            ? animatedProgress[projectIndex]
-                            : progressPercentage
-                        }%`,
-                      }}
-                      className="h-full bg-blue-500 rounded transition-width duration-200"
-                    ></div>
+                    {/* Edit button */}
+                    <button
+                      onClick={() => handleEditClick(project.id)}
+                      className="text-green-500 hover:underline focus:outline-none"
+                    >
+                      Edit
+                    </button>
                   </div>
-                </div>
-              )}
 
-              {visibleSteps[projectIndex] && project.steps && (
-                <ul className="space-y-2 mt-2"> {/* Adjust margin for medium screens */}
-                  {project.steps.map((step, stepIndex) => (
-                    <li key={stepIndex}>
-                      <label className="flex items-center space-x-2">
+                  {project.name && project.description && (
+                    <span className="text-gray-600 mt-2 md:mt-0 md:ml-2">
+                      (Start: {project.startDate}, Due: {project.dueDate})
+                      {progressPercentage === 100 && (
+                        <span className="text-green-600 ml-2">
+                          (Completed)
+                        </span>
+                      )}
+                    </span>
+                  )}
+
+                  {project.name && project.description && (
+                    <div className="flex flex-col space-y-2 mt-2">
+                      <p>Project Description: {project.description}</p>
+                      <button
+                        onClick={() => handleDeleteProject(projectIndex)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 focus:outline-none"
+                      >
+                        Delete Project
+                      </button>
+                      <span className="text-green-600">
+                        Progress:{" "}
+                        {animatedProgress[projectIndex] !== undefined
+                          ? animatedProgress[projectIndex]
+                          : progressPercentage.toFixed(2)}
+                        %
+                      </span>
+                      <div className="w-full h-2 bg-gray-200 rounded">
+                        <div
+                          style={{
+                            width: `${
+                              animatedProgress[projectIndex] !== undefined
+                                ? animatedProgress[projectIndex]
+                                : progressPercentage
+                            }%`,
+                          }}
+                          className="h-full bg-blue-500 rounded transition-width duration-200"
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {visibleSteps[projectIndex] && project.steps && (
+                    <ul className="space-y-2 mt-2">
+                      {project.steps.map((step, stepIndex) => (
+                        <li key={stepIndex}>
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={step.completed}
+                              onChange={() =>
+                                handleToggleStep(projectIndex, stepIndex)
+                              }
+                              className="form-checkbox text-blue-500 focus:ring-blue-400"
+                            />
+                            <span>{step.name}</span>
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Edit form */}
+                  {editingProjectId === project.id && (
+                    <form onSubmit={handleEditSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                      <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                          Name
+                        </label>
                         <input
-                          type="checkbox"
-                          checked={step.completed}
-                          onChange={() =>
-                            handleToggleStep(projectIndex, stepIndex)
-                          }
-                          className="form-checkbox text-blue-500 focus:ring-blue-400"
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          id="name"
+                          type="text"
+                          placeholder="Edit Name"
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
                         />
-                        <span>{step.name}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+                          Description
+                        </label>
+                        <textarea
+                          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          id="description"
+                          placeholder="Edit Description"
+                          value={editedDescription}
+                          onChange={(e) => setEditedDescription(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex mb-4">
+                        <div className="w-1/2 pr-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="startDate">
+                            Start Date
+                          </label>
+                          <input
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="startDate"
+                            type="date"
+                            placeholder="Edit Start Date"
+                            value={editedStartDate}
+                            onChange={(e) => setEditedStartDate(e.target.value)}
+                          />
+                        </div>
+                        <div className="w-1/2 pl-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dueDate">
+                            Due Date
+                          </label>
+                          <input
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="dueDate"
+                            type="date"
+                            placeholder="Edit Due Date"
+                            value={editedDueDate}
+                            onChange={(e) => setEditedDueDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
 
-            );
-          })}
-        </ul>
-      )}
-    </div>
+                      {/* Edit steps */}
+                      <ul className="space-y-2 mt-2">
+                        {editingSteps.map((step, stepIndex) => (
+                          <li key={stepIndex} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={step.completed}
+                              onChange={() => handleEditToggleStep(stepIndex)}
+                              className="form-checkbox text-blue-500 focus:ring-blue-400"
+                            />
+                            <span>{step.name}</span>
+                            <button
+                              onClick={() => handleRemoveStep(stepIndex)}
+                              className="text-red-500 hover:underline focus:outline-none"
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="flex items-center mt-2">
+                        <input
+                          type="text"
+                          placeholder="New Step Name"
+                          value={newStepName}
+                          onChange={(e) => setNewStepName(e.target.value)}
+                          className="shadow appearance-none border rounded w-3/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        />
+                        <button
+                          onClick={handleAddStep}
+                          className="bg-blue-500 text-white py-2 px-3 rounded focus:outline-none hover:bg-blue-600 ml-2"
+                        >
+                          Add Step
+                        </button>
+                      </div>
+                      <div className="flex items-center mt-4">
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="bg-red-500 text-white py-2 px-4 rounded mr-2 hover:bg-red-600 focus:outline-none focus:shadow-outline"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-green-500 text-white py-2 px-4 rounded mt-4 w-full hover:bg-green-600 focus:outline-none focus:shadow-outline"
+                      >
+                        Save
+                      </button>
+                      </div>
+                    </form>
+                  )}
+
+                  
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </>
-    
   );
 }
 

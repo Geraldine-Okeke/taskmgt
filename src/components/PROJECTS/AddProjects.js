@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useProjects } from './ProjectsContext'; 
+import { v4 as uuidv4 } from 'uuid';
 
 function AddProjects() {
   const { addProject } = useProjects(); 
@@ -26,12 +27,19 @@ function AddProjects() {
     e.preventDefault();
 
     if (name && description) {
-      addProject(name, description, startDate, dueDate, steps);
+      const projectId = uuidv4(); // Generate a unique projectId
+      addProject(projectId, name, description, startDate, dueDate, steps);
+
+      // Pass projectId to ViewProject.js
+      // You can use console.log here to log the projectId
+      console.log('projectId:', projectId);
+
       setName('');
       setDescription('');
       setStartDate('');
       setDueDate('');
       setSteps([]);
+
 
       // Clear saved steps from Local Storage after adding the project
       localStorage.removeItem('savedSteps');
