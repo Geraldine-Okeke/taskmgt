@@ -9,12 +9,10 @@ function ViewProjects() {
 
   const calendarRef = useRef(null);
 
-  const loggedProjectIds = useRef(false); // Use a ref to track if IDs are logged
+  const loggedProjectIds = useRef(false); 
 
-  // State to track which project is currently being edited
   const [editingProjectId, setEditingProjectId] = useState(null);
 
-  // State to track edited name, description, start date, and due date
   const [editedName, setEditedName] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedStartDate, setEditedStartDate] = useState("");
@@ -22,45 +20,31 @@ function ViewProjects() {
   const [editingSteps, setEditingSteps] = useState([]);
   const [newStepName, setNewStepName] = useState("");
   
-  // Function to handle the "Edit" button click
   const handleEditClick = (projectId) => {
-    // Find the project to edit based on the projectId
     const projectToEdit = projects.find((project) => project.id === projectId);
-
-    // Set the edited values with the current values
     setEditedName(projectToEdit.name);
     setEditedDescription(projectToEdit.description);
     setEditedStartDate(projectToEdit.startDate);
     setEditedDueDate(projectToEdit.dueDate);
-
-    // Set the editingProjectId to the projectId to identify the project being edited
     setEditingProjectId(projectId);
-
-    // Set the editing steps for the project
     setEditingSteps(projectToEdit.steps);
   };
 
-
-  // Function to handle form submission for editing
   const handleEditSubmit = (e) => {
     e.preventDefault();
 
-    // Find the project being edited based on editingProjectId
     const projectToEdit = projects.find(
       (project) => project.id === editingProjectId
     );
 
-    // Update the project with the edited values
     projectToEdit.name = editedName;
     projectToEdit.description = editedDescription;
     projectToEdit.startDate = editedStartDate;
     projectToEdit.dueDate = editedDueDate;
     projectToEdit.steps = editingSteps;
 
-    // Update the projects array in the context
     setProjects([...projects]);
 
-    // Reset the editing state
     setEditingProjectId(null);
     setEditedName("");
     setEditedDescription("");
@@ -68,14 +52,13 @@ function ViewProjects() {
     setEditedDueDate("");
     setEditingSteps([]);
   };
-  const handleAddStep = () => {
-    if (newStepName.trim() !== "") {
-      setEditingSteps([...editingSteps, { name: newStepName, completed: false }]);
-      setNewStepName("");
-    }
-  };
-
-  // Function to handle removing a step by index
+  
+const handleAddStep = () => {
+  if (newStepName.trim() !== "") {
+    setEditingSteps([...editingSteps, { name: newStepName, completed: false }]);
+   
+  }
+};
   const handleRemoveStep = (stepIndex) => {
     const updatedSteps = [...editingSteps];
     updatedSteps.splice(stepIndex, 1);
@@ -85,6 +68,15 @@ function ViewProjects() {
     const updatedSteps = [...editingSteps];
     updatedSteps[stepIndex].completed = !updatedSteps[stepIndex].completed;
     setEditingSteps(updatedSteps);
+    
+  };
+  const handleCancelEdit = () => {
+    setEditingProjectId(null);
+    setEditedName("");
+    setEditedDescription("");
+    setEditedStartDate("");
+    setEditedDueDate("");
+    
   };
 
   useEffect(() => {
@@ -95,15 +87,7 @@ function ViewProjects() {
       loggedProjectIds.current = true; 
     }
   }, [projects]);
-  const handleCancelEdit = () => {
-    // Reset the editing state
-    setEditingProjectId(null);
-    setEditedName("");
-    setEditedDescription("");
-    setEditedStartDate("");
-    setEditedDueDate("");
-    
-  };
+  
   useEffect(() => {
     
     const screenWidth = window.innerWidth;
@@ -124,11 +108,10 @@ function ViewProjects() {
 
 
   useEffect(() => {
-    // Load saved projects from Local Storage on component mount
     const savedProjects = JSON.parse(
       localStorage.getItem("savedProjects") || "[]"
     );
-    setProjects(savedProjects); // Load projects into state
+    setProjects(savedProjects); 
   }, [setProjects]);
 
   useEffect(() => {
@@ -218,6 +201,11 @@ function ViewProjects() {
       <div className="text-xs font-semibold">{formattedDate}</div>
     );
   };
+  const sortedProjects = [...projects].sort((a, b) => {
+    const startDateA = new Date(a.startDate);
+    const startDateB = new Date(b.startDate);
+    return startDateA - startDateB;
+  });
 
   return (
     <>
@@ -235,11 +223,11 @@ function ViewProjects() {
 
       <div className="p-4 space-y-4 mt-20">
         <h2 className="text-xl font-semibold">View Current Projects</h2>
-        {projects.length === 0 ? (
+        {sortedProjects.length === 0 ? (
           <p>No projects available.</p>
         ) : (
           <ul className="space-y-4">
-            {projects.map((project, projectIndex) => {
+             {sortedProjects.map((project, projectIndex) => {
               const completedSteps = project.steps.filter(
                 (step) => step.completed
               ).length;
@@ -409,6 +397,7 @@ function ViewProjects() {
                             />
                             <span>{step.name}</span>
                             <button
+                              type="button"
                               onClick={() => handleRemoveStep(stepIndex)}
                               className="text-red-500 hover:underline focus:outline-none"
                             >
@@ -426,6 +415,7 @@ function ViewProjects() {
                           className="shadow appearance-none border rounded w-3/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         />
                         <button
+                          type='button'
                           onClick={handleAddStep}
                           className="bg-blue-500 text-white py-2 px-3 rounded focus:outline-none hover:bg-blue-600 ml-2"
                         >
