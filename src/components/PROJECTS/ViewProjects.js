@@ -426,7 +426,7 @@ const handleAddStep = () => {
                       <button
                         type="button"
                         onClick={handleCancelEdit}
-                        className="bg-red-500 text-white py-2 px-4 rounded mr-2 hover:bg-red-600 focus:outline-none focus:shadow-outline"
+                        className="bg-red-500 text-white py-2 px-4 rounded mt-4 w-full   mr-2 hover:bg-red-600 focus:outline-none focus:shadow-outline"
                       >
                         Cancel
                       </button>
