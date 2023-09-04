@@ -1,5 +1,3 @@
-Certainly! Here's a revised README.md for your Task Manager/To-Do List web app:
-
 # Task Manager/To-Do List Web App
 
 Welcome to the Task Manager/To-Do List web app, built to showcase front-end development skills using React and Tailwind CSS. This application offers a user-friendly interface for managing projects and tasks efficiently.
