@@ -8,6 +8,7 @@ Welcome to the Task Manager/To-Do List web app, built to showcase front-end deve
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
+- [Light and Dark Mode](#light-and-dark-mode)
 - [Technologies Used](#technologies-used)
 - [Contributing](#contributing)
 - [License](#license)
@@ -81,7 +82,11 @@ To run this project locally or contribute to its development, follow these steps
    - Click the "Edit" button to edit a project's details, steps, or dates.
    - Use the checkboxes to mark project steps as completed.
 
-4. **Calendar View**:
+4. **Light and Dark Mode**:
+
+   - The app includes a toggler at the upper right part of the page, allowing you to switch between light and dark modes for a comfortable viewing experience.
+
+5. **Calendar View**:
    - The app provides a calendar view that shows an overview of your projects and their due dates.
 
 ## Technologies Used
