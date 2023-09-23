@@ -38,7 +38,7 @@ To run this project locally or contribute to its development, follow these steps
 1. **Clone the Repository**: Start by cloning this repository to your local machine.
 
    ```bash
-   git clone https://github.com/your-username/task-manager-app.git
+   git clone https://github.com/Geraldine-Okeke/task-manager-app.git
    ```
 
 2. **Navigate to the Project Directory**:
