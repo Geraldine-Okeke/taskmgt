@@ -11,7 +11,6 @@ Welcome to the Task Manager/To-Do List web app, built to showcase front-end deve
 - [Light and Dark Mode](#light-and-dark-mode)
 - [Technologies Used](#technologies-used)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Demo
 
@@ -40,7 +39,7 @@ To run this project locally or contribute to its development, follow these steps
    ```bash
    git clone https://github.com/Geraldine-Okeke/task-manager-app.git
    ```
-
+           
 2. **Navigate to the Project Directory**:
 
    ```bash
@@ -99,6 +98,3 @@ To run this project locally or contribute to its development, follow these steps
 
 Contributions to this project are welcome! Feel free to open issues, submit pull requests, or provide feedback to help improve the app.
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE.md file for details.
