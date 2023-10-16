@@ -11,7 +11,7 @@ Welcome to the Task Manager/To-Do List web app, built to showcase front-end deve
 - [Light and Dark Mode](#light-and-dark-mode)
 - [Technologies Used](#technologies-used)
 - [Contributing](#contributing)
-
+- [License](#license)
 ## Demo
 
 Explore the live demo of the Task Manager/To-Do List web app by clicking (https://taskmgt-sandy.vercel.app/).
@@ -97,4 +97,8 @@ To run this project locally or contribute to its development, follow these steps
 ## Contributing
 
 Contributions to this project are welcome! Feel free to open issues, submit pull requests, or provide feedback to help improve the app.
+
+## License
+This project is licensed under the terms of the MIT License.
+
 
